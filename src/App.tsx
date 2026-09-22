@@ -70,7 +70,11 @@ export default function App() {
       <header className="hero">
         <div className="hero__inner">
           <p className="hero__eyebrow">Lokal · Datenschutzfreundlich · Ohne Cloud</p>
-          <h1 className="hero__title">Digital Business Card QR Generator</h1>
+          <h1 className="hero__title">
+            <span className="hero__title-gebr">Gebr.</span>{' '}
+            <span className="hero__title-becker">Becker</span> Digital Business Card QR
+            Generator
+          </h1>
           <p className="hero__lead">
             Erstellen Sie aus geschäftlichen Kontaktdaten einen QR-Code mit vCard und ein
             professionelles Hintergrundbild für Smartphone oder Desktop. Alle Eingaben bleiben
@@ -83,7 +87,7 @@ export default function App() {
         <Section
           id="kontaktdaten"
           title="Kontaktdaten"
-          description="Formular ausfüllen, eigene Visitenkarte (VCF) laden oder einen anderen Kontakt vom Handy wählen."
+          description="Formular ausfüllen oder „Meine Visitenkarte importieren“ (.vcf) — auch auf dem iPhone."
         >
           <ContactForm
             contact={contact}
@@ -162,9 +166,12 @@ export default function App() {
       </main>
 
       <footer className="footer">
+        <p>Local First: Kontaktdaten und Logo verlassen Ihren Browser nicht.</p>
         <p>
-          Local First: Kontaktdaten und Logo verlassen Ihren Browser nicht. Keine Tracking-,
-          Analyse- oder Werbedienste.
+          Geschrieben und entwickelt von der IT-Abteilung (ABE). Weitere Projekte:{' '}
+          <a href="https://it-becker.org" target="_blank" rel="noopener noreferrer">
+            it-becker.org
+          </a>
         </p>
       </footer>
     </div>

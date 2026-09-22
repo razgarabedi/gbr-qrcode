@@ -94,6 +94,14 @@ input {
   line-height: 1.15;
 }
 
+.hero__title-gebr {
+  color: #a8002a;
+}
+
+.hero__title-becker {
+  color: #00325f;
+}
+
 .hero__lead {
   margin: 0;
   max-width: 46rem;
@@ -1019,4 +1027,18 @@ input {
 
 .footer p {
   margin: 0;
+}
+
+.footer p + p {
+  margin-top: 0.35rem;
+}
+
+.footer a {
+  color: var(--color-navy, #00325f);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer a:hover {
+  color: var(--color-brand, #a8002a);
 }

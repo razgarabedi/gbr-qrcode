@@ -2,10 +2,6 @@ import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import type { ContactCard } from '../types/contact'
 import { importContactsFromFiles } from '../lib/contactImport'
 import {
-  isDeviceContactPickerAvailable,
-  pickDeviceContacts,
-} from '../lib/deviceContacts'
-import {
   normalizeWebsite,
   validateContact,
   type ContactField,
@@ -41,14 +37,9 @@ export function ContactForm({ contact, onChange, sharedImportNotice }: ContactFo
     {},
   )
   const [showAllErrors, setShowAllErrors] = useState(false)
-  const [devicePickerAvailable, setDevicePickerAvailable] = useState(false)
   const [importBusy, setImportBusy] = useState(false)
   const [importError, setImportError] = useState<string | null>(null)
   const [importStatus, setImportStatus] = useState<string | null>(null)
-
-  useEffect(() => {
-    setDevicePickerAvailable(isDeviceContactPickerAvailable())
-  }, [])
 
   useEffect(() => {
     if (sharedImportNotice) setImportStatus(sharedImportNotice)
@@ -95,26 +86,6 @@ export function ContactForm({ contact, onChange, sharedImportNotice }: ContactFo
     setImportStatus(status)
   }
 
-  const handleDevicePick = async () => {
-    setImportBusy(true)
-    setImportError(null)
-    setImportStatus(null)
-    try {
-      const result = await pickDeviceContacts({ multiple: false })
-      if (!result.ok) {
-        setImportError(result.message)
-        return
-      }
-      if (result.cancelled || result.contacts.length === 0) return
-      applyLoadedContact(
-        result.contacts[0],
-        'Kontakt aus dem Adressbuch übernommen. Tipp: Die eigene Visitenkarte fehlt oft im Picker — dann VCF laden.',
-      )
-    } finally {
-      setImportBusy(false)
-    }
-  }
-
   const handleVcfFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return
     setImportBusy(true)
@@ -124,15 +95,13 @@ export function ContactForm({ contact, onChange, sharedImportNotice }: ContactFo
       const result = await importContactsFromFiles(files)
       if (result.contacts.length === 0) {
         setImportError(
-          'Keine Visitenkarte erkannt. Bitte eine .vcf-Datei wählen (eigene Karte aus Kontakte/WhatsApp).',
+          'Keine Visitenkarte erkannt. Bitte die .vcf von „Meine Visitenkarte“ aus der Kontakte-App wählen.',
         )
         return
       }
       applyLoadedContact(
         result.contacts[0],
-        result.contacts.length === 1
-          ? 'Eigene Visitenkarte (VCF) ins Formular geladen.'
-          : `Erste von ${result.contacts.length} Visitenkarten geladen — weitere im Stapelimport.`,
+        'Meine Visitenkarte wurde ins Formular übernommen.',
       )
     } catch {
       setImportError('Die Visitenkarte konnte nicht geladen werden.')
@@ -172,25 +141,14 @@ export function ContactForm({ contact, onChange, sharedImportNotice }: ContactFo
             disabled={importBusy}
             onClick={() => vcfInputRef.current?.click()}
           >
-            {importBusy ? 'Lade…' : 'Eigene Visitenkarte (VCF)'}
+            {importBusy ? 'Lade…' : 'Meine Visitenkarte importieren'}
           </button>
-          {devicePickerAvailable ? (
-            <button
-              type="button"
-              className="button button--secondary"
-              disabled={importBusy}
-              onClick={() => {
-                void handleDevicePick()
-              }}
-            >
-              {importBusy ? 'Öffne Kontakte…' : 'Anderen Kontakt wählen'}
-            </button>
-          ) : null}
         </div>
         <p className="contact-form__import-hint">
-          Die eigene Visitenkarte erscheint im Handy-Picker oft nicht (anders als in WhatsApp). Laden
-          Sie eine <strong>.vcf</strong> aus der Kontakte-App oder teilen Sie einen Kontakt aus
-          WhatsApp an diese App (nach Installation auf dem Homescreen).
+          Importiert <strong>eine</strong> eigene Visitenkarte als <code>.vcf</code> — funktioniert
+          auf <strong>iPhone und Android</strong>. In der Kontakte-App: „Meine Visitenkarte“ /
+          „Mein Kontakt“ öffnen → Teilen/Exportieren → Datei hier wählen. Automatisches Auslesen
+          der Geräte-Besitzerkarte ist in Browser-Apps nicht möglich (weder iOS noch Android).
         </p>
         {importError ? (
           <p className="field-error" role="alert">
