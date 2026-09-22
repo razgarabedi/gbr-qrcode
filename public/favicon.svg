@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="100%" height="100%">
+  <defs>
+    <!-- Symmetrische Hälfte des Logos -->
+    <path id="logo-half" d="
+      M 487,70 
+      L 115,70 
+      A 40,40 0 0 0 75,110 
+      L 75,490 
+      A 40,40 0 0 0 115,530 
+      L 487,530 
+      L 487,310 
+      L 355,310 
+      A 25,25 0 0 0 330,335 
+      L 330,370 
+      A 20,20 0 0 1 310,390 
+      L 255,390 
+      A 20,20 0 0 1 235,370 
+      L 235,230 
+      A 35,35 0 0 1 270,195 
+      L 487,195 
+      Z" />
+  </defs>
+
+  <!-- Linker roter Block -->
+  <use href="#logo-half" fill="#A8002A" />
+
+  <!-- Rechter blauer Block (Spiegelung an der Mittelachse) -->
+  <use href="#logo-half" transform="translate(1000, 0) scale(-1, 1)" fill="#00325F" />
+</svg>
