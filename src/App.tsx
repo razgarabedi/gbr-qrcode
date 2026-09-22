@@ -11,6 +11,7 @@ import {
 } from './components/WallpaperPreview'
 import { revokeLogoAsset } from './lib/logo'
 import type { QrVisualStyle } from './lib/qrShape'
+import { consumeSharedContactImport } from './lib/shareTarget'
 import { isContactValid } from './lib/validate'
 import {
   emptyContactCard,
@@ -27,6 +28,7 @@ export default function App() {
   const [wallpaperSettings, setWallpaperSettings] = useState<WallpaperSettings>(() =>
     createDefaultWallpaperSettings(),
   )
+  const [sharedImportNotice, setSharedImportNotice] = useState<string | null>(null)
   const logoRef = useRef<LogoAsset | null>(null)
   const wallpaperBgRef = useRef<LogoAsset | null>(null)
   logoRef.current = logo
@@ -38,6 +40,24 @@ export default function App() {
     return () => {
       revokeLogoAsset(logoRef.current)
       revokeLogoAsset(wallpaperBgRef.current)
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      const result = await consumeSharedContactImport()
+      if (cancelled || !result || result.contacts.length === 0) return
+      setContact(result.contacts[0])
+      setSharedImportNotice(
+        result.contacts.length === 1
+          ? 'Geteilte Visitenkarte (z. B. aus WhatsApp) übernommen.'
+          : `Geteilte Datei: erste von ${result.contacts.length} Visitenkarten übernommen.`,
+      )
+      document.getElementById('kontaktdaten')?.scrollIntoView({ behavior: 'smooth' })
+    })()
+    return () => {
+      cancelled = true
     }
   }, [])
 
@@ -63,15 +83,19 @@ export default function App() {
         <Section
           id="kontaktdaten"
           title="Kontaktdaten"
-          description="Diese Angaben fließen in die vCard und damit in den QR-Code ein. Es erfolgt keine automatische Speicherung."
+          description="Formular ausfüllen, eigene Visitenkarte (VCF) laden oder einen anderen Kontakt vom Handy wählen."
         >
-          <ContactForm contact={contact} onChange={setContact} />
+          <ContactForm
+            contact={contact}
+            onChange={setContact}
+            sharedImportNotice={sharedImportNotice}
+          />
         </Section>
 
         <Section
           id="stapelimport"
           title="Stapelimport & Batch-QR"
-          description="Kontakte vom Handy-Adressbuch wählen oder aus VCF/CSV importieren und QR-Codes als ZIP (Vorname_Nachname.png) exportieren."
+          description="Eigene VCF/CSV laden oder andere Kontakte vom Handy wählen und QR-Codes als ZIP (Vorname_Nachname.png) exportieren."
         >
           <BatchImport
             logo={logo}

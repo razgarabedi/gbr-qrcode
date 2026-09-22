@@ -167,6 +167,13 @@ input {
   margin-bottom: 0.25rem;
 }
 
+.contact-form__import-hint {
+  margin: 0 0 0.75rem;
+  color: var(--color-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
 .form-intro {
   margin: 0 0 1rem;
   color: var(--color-muted);

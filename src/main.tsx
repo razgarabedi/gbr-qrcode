@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
+import { registerShareTargetWorker } from './lib/shareTarget'
 import './styles/index.css'
 
 const rootElement = document.getElementById('root')
@@ -8,6 +9,8 @@ const rootElement = document.getElementById('root')
 if (!rootElement) {
   throw new Error('Root-Element #root wurde nicht gefunden.')
 }
+
+registerShareTargetWorker()
 
 createRoot(rootElement).render(
   <StrictMode>

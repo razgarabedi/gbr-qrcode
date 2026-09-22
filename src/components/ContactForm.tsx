@@ -1,5 +1,6 @@
-import { useEffect, useId, useState, type FormEvent } from 'react'
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import type { ContactCard } from '../types/contact'
+import { importContactsFromFiles } from '../lib/contactImport'
 import {
   isDeviceContactPickerAvailable,
   pickDeviceContacts,
@@ -14,6 +15,7 @@ import { ContactCardPreview } from './ContactCardPreview'
 type ContactFormProps = {
   contact: ContactCard
   onChange: (next: ContactCard) => void
+  sharedImportNotice?: string | null
 }
 
 const FIELD_ORDER: ContactField[] = [
@@ -32,19 +34,25 @@ const FIELD_ORDER: ContactField[] = [
   'country',
 ]
 
-export function ContactForm({ contact, onChange }: ContactFormProps) {
+export function ContactForm({ contact, onChange, sharedImportNotice }: ContactFormProps) {
   const formId = useId()
+  const vcfInputRef = useRef<HTMLInputElement>(null)
   const [touched, setTouched] = useState<Partial<Record<ContactField | 'contactMethod', boolean>>>(
     {},
   )
   const [showAllErrors, setShowAllErrors] = useState(false)
   const [devicePickerAvailable, setDevicePickerAvailable] = useState(false)
-  const [deviceBusy, setDeviceBusy] = useState(false)
-  const [deviceError, setDeviceError] = useState<string | null>(null)
+  const [importBusy, setImportBusy] = useState(false)
+  const [importError, setImportError] = useState<string | null>(null)
+  const [importStatus, setImportStatus] = useState<string | null>(null)
 
   useEffect(() => {
     setDevicePickerAvailable(isDeviceContactPickerAvailable())
   }, [])
+
+  useEffect(() => {
+    if (sharedImportNotice) setImportStatus(sharedImportNotice)
+  }, [sharedImportNotice])
 
   const errors = validateContact(contact)
 
@@ -79,21 +87,58 @@ export function ContactForm({ contact, onChange }: ContactFormProps) {
     })
   }
 
+  const applyLoadedContact = (next: ContactCard, status: string) => {
+    onChange(next)
+    setShowAllErrors(false)
+    setTouched({})
+    setImportError(null)
+    setImportStatus(status)
+  }
+
   const handleDevicePick = async () => {
-    setDeviceBusy(true)
-    setDeviceError(null)
+    setImportBusy(true)
+    setImportError(null)
+    setImportStatus(null)
     try {
       const result = await pickDeviceContacts({ multiple: false })
       if (!result.ok) {
-        setDeviceError(result.message)
+        setImportError(result.message)
         return
       }
       if (result.cancelled || result.contacts.length === 0) return
-      onChange(result.contacts[0])
-      setShowAllErrors(false)
-      setTouched({})
+      applyLoadedContact(
+        result.contacts[0],
+        'Kontakt aus dem Adressbuch übernommen. Tipp: Die eigene Visitenkarte fehlt oft im Picker — dann VCF laden.',
+      )
     } finally {
-      setDeviceBusy(false)
+      setImportBusy(false)
+    }
+  }
+
+  const handleVcfFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
+    setImportBusy(true)
+    setImportError(null)
+    setImportStatus(null)
+    try {
+      const result = await importContactsFromFiles(files)
+      if (result.contacts.length === 0) {
+        setImportError(
+          'Keine Visitenkarte erkannt. Bitte eine .vcf-Datei wählen (eigene Karte aus Kontakte/WhatsApp).',
+        )
+        return
+      }
+      applyLoadedContact(
+        result.contacts[0],
+        result.contacts.length === 1
+          ? 'Eigene Visitenkarte (VCF) ins Formular geladen.'
+          : `Erste von ${result.contacts.length} Visitenkarten geladen — weitere im Stapelimport.`,
+      )
+    } catch {
+      setImportError('Die Visitenkarte konnte nicht geladen werden.')
+    } finally {
+      setImportBusy(false)
+      if (vcfInputRef.current) vcfInputRef.current.value = ''
     }
   }
 
@@ -109,23 +154,52 @@ export function ContactForm({ contact, onChange }: ContactFormProps) {
           nur in diesem Browserfenster — es findet keine Speicherung und keine Übertragung statt.
         </p>
 
-        {devicePickerAvailable ? (
-          <div className="button-row contact-form__device-pick">
+        <input
+          ref={vcfInputRef}
+          id={`${formId}-vcf`}
+          type="file"
+          accept=".vcf,.vcard,text/vcard,text/x-vcard"
+          hidden
+          onChange={(event) => {
+            void handleVcfFiles(event.target.files)
+          }}
+        />
+
+        <div className="button-row contact-form__device-pick">
+          <button
+            type="button"
+            className="button"
+            disabled={importBusy}
+            onClick={() => vcfInputRef.current?.click()}
+          >
+            {importBusy ? 'Lade…' : 'Eigene Visitenkarte (VCF)'}
+          </button>
+          {devicePickerAvailable ? (
             <button
               type="button"
-              className="button"
-              disabled={deviceBusy}
+              className="button button--secondary"
+              disabled={importBusy}
               onClick={() => {
                 void handleDevicePick()
               }}
             >
-              {deviceBusy ? 'Öffne Kontakte…' : 'Kontakt vom Handy wählen'}
+              {importBusy ? 'Öffne Kontakte…' : 'Anderen Kontakt wählen'}
             </button>
-          </div>
-        ) : null}
-        {deviceError ? (
+          ) : null}
+        </div>
+        <p className="contact-form__import-hint">
+          Die eigene Visitenkarte erscheint im Handy-Picker oft nicht (anders als in WhatsApp). Laden
+          Sie eine <strong>.vcf</strong> aus der Kontakte-App oder teilen Sie einen Kontakt aus
+          WhatsApp an diese App (nach Installation auf dem Homescreen).
+        </p>
+        {importError ? (
           <p className="field-error" role="alert">
-            {deviceError}
+            {importError}
+          </p>
+        ) : null}
+        {importStatus ? (
+          <p className="placeholder-note" role="status">
+            {importStatus}
           </p>
         ) : null}
 

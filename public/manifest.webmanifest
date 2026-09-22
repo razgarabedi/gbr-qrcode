@@ -1,0 +1,34 @@
+{
+  "name": "Digital Business Card QR",
+  "short_name": "GBR QR",
+  "description": "Lokaler Generator für Visitenkarten-QR-Codes und Hintergrundbilder.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f4ef",
+  "theme_color": "#00325F",
+  "lang": "de",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "share_target": {
+    "action": "/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "contacts",
+          "accept": ["text/vcard", "text/x-vcard", "text/directory", ".vcf", ".vcard"]
+        }
+      ]
+    }
+  }
+}

@@ -173,9 +173,9 @@ export function BatchImport({ logo, qrStyle, onLoadContact }: BatchImportProps) 
   return (
     <div className="batch-import">
       <p className="batch-import__lead">
-        Auf dem Handy Kontakte direkt aus dem Adressbuch wählen (wie bei WhatsApp/Telegram) oder
-        VCF-/CSV-Dateien importieren. Anschließend QR-Codes als ZIP — Dateiname jeweils{' '}
-        <code>Vorname_Nachname.png</code>.
+        Andere Kontakte aus dem Adressbuch wählen, oder eine <strong>eigene Visitenkarte als
+        VCF</strong> laden (das eigene Profil fehlt im Handy-Picker oft — anders als in WhatsApp).
+        Anschließend QR-Codes als ZIP — Dateiname jeweils <code>Vorname_Nachname.png</code>.
       </p>
 
       <input
@@ -191,26 +191,26 @@ export function BatchImport({ logo, qrStyle, onLoadContact }: BatchImportProps) 
       />
 
       <div className="button-row">
+        <button
+          type="button"
+          className="button"
+          disabled={busy || exportBusy}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {busy && !devicePickerAvailable ? 'Importiere…' : 'Visitenkarte / Datei laden'}
+        </button>
         {devicePickerAvailable ? (
           <button
             type="button"
-            className="button"
+            className="button button--secondary"
             disabled={busy || exportBusy}
             onClick={() => {
               void handleDevicePick()
             }}
           >
-            {busy ? 'Öffne Kontakte…' : 'Vom Handy auswählen'}
+            {busy ? 'Öffne Kontakte…' : 'Andere Kontakte vom Handy'}
           </button>
         ) : null}
-        <button
-          type="button"
-          className={devicePickerAvailable ? 'button button--secondary' : 'button'}
-          disabled={busy || exportBusy}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {busy && !devicePickerAvailable ? 'Importiere…' : 'Datei importieren'}
-        </button>
         <button
           type="button"
           className="button button--secondary"
@@ -222,18 +222,14 @@ export function BatchImport({ logo, qrStyle, onLoadContact }: BatchImportProps) 
       </div>
 
       <p className="batch-import__hint">
+        <strong>Eigene Visitenkarte:</strong> VCF aus der Kontakte-App oder „Kontakt teilen“ aus
+        WhatsApp an diese App (Homescreen-Installation).{' '}
         {devicePickerAvailable ? (
           <>
-            <strong>Vom Handy auswählen</strong> öffnet den systemeigenen Kontakt-Picker (Chrome
-            Android, HTTPS). Alternativ:{' '}
+            <strong>Andere Kontakte vom Handy</strong> öffnet den System-Picker (ohne „Ich“-Profil).{' '}
           </>
-        ) : (
-          <>
-            Direktzugriff aufs Adressbuch ist hier nicht verfügbar (u. a. iPhone/Safari oder HTTP im
-            WLAN). Nutzen Sie eine VCF aus der Kontakte-App oder{' '}
-          </>
-        )}
-        <strong>VCF / vCard</strong>, <strong>Outlook-CSV</strong>, <strong>Google-Kontakte-CSV</strong>.
+        ) : null}
+        Auch möglich: Outlook-/Google-CSV, Mehrfach-VCF.
       </p>
 
       {error ? (
