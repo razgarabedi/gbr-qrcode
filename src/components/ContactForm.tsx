@@ -12,6 +12,7 @@ type ContactFormProps = {
   contact: ContactCard
   onChange: (next: ContactCard) => void
   sharedImportNotice?: string | null
+  showImport?: boolean
 }
 
 const FIELD_ORDER: ContactField[] = [
@@ -30,7 +31,12 @@ const FIELD_ORDER: ContactField[] = [
   'country',
 ]
 
-export function ContactForm({ contact, onChange, sharedImportNotice }: ContactFormProps) {
+export function ContactForm({
+  contact,
+  onChange,
+  sharedImportNotice,
+  showImport = true,
+}: ContactFormProps) {
   const formId = useId()
   const vcfInputRef = useRef<HTMLInputElement>(null)
   const [touched, setTouched] = useState<Partial<Record<ContactField | 'contactMethod', boolean>>>(
@@ -123,37 +129,41 @@ export function ContactForm({ contact, onChange, sharedImportNotice }: ContactFo
           nur in diesem Browserfenster — es findet keine Speicherung und keine Übertragung statt.
         </p>
 
-        <input
-          ref={vcfInputRef}
-          id={`${formId}-vcf`}
-          type="file"
-          accept=".vcf,.vcard,text/vcard,text/x-vcard"
-          hidden
-          onChange={(event) => {
-            void handleVcfFiles(event.target.files)
-          }}
-        />
+        {showImport ? (
+          <>
+            <input
+              ref={vcfInputRef}
+              id={`${formId}-vcf`}
+              type="file"
+              accept=".vcf,.vcard,text/vcard,text/x-vcard"
+              hidden
+              onChange={(event) => {
+                void handleVcfFiles(event.target.files)
+              }}
+            />
 
-        <div className="button-row contact-form__device-pick">
-          <button
-            type="button"
-            className="button"
-            disabled={importBusy}
-            onClick={() => vcfInputRef.current?.click()}
-          >
-            {importBusy ? 'Lade…' : 'Meine Visitenkarte importieren'}
-          </button>
-        </div>
-        <p className="contact-form__import-hint">
-          Importiert <strong>eine</strong> eigene Visitenkarte als <code>.vcf</code> — funktioniert
-          auf <strong>iPhone und Android</strong>. In der Kontakte-App: „Meine Visitenkarte“ /
-          „Mein Kontakt“ öffnen → Teilen/Exportieren → Datei hier wählen. Automatisches Auslesen
-          der Geräte-Besitzerkarte ist in Browser-Apps nicht möglich (weder iOS noch Android).
-        </p>
-        {importError ? (
-          <p className="field-error" role="alert">
-            {importError}
-          </p>
+            <div className="button-row contact-form__device-pick">
+              <button
+                type="button"
+                className="button"
+                disabled={importBusy}
+                onClick={() => vcfInputRef.current?.click()}
+              >
+                {importBusy ? 'Lade…' : 'Meine Visitenkarte importieren'}
+              </button>
+            </div>
+            <p className="contact-form__import-hint">
+              Importiert <strong>eine</strong> eigene Visitenkarte als <code>.vcf</code> — funktioniert
+              auf <strong>iPhone und Android</strong>. In der Kontakte-App: „Meine Visitenkarte“ /
+              „Mein Kontakt“ öffnen → Teilen/Exportieren → Datei hier wählen. Automatisches Auslesen
+              der Geräte-Besitzerkarte ist in Browser-Apps nicht möglich (weder iOS noch Android).
+            </p>
+            {importError ? (
+              <p className="field-error" role="alert">
+                {importError}
+              </p>
+            ) : null}
+          </>
         ) : null}
         {importStatus ? (
           <p className="placeholder-note" role="status">

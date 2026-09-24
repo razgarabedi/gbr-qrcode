@@ -464,17 +464,19 @@ export function WallpaperPreview({
           />
         </label>
 
-        <label className="field" htmlFor={`${formId}-logo-opacity`}>
-          <span>Logo-Deckkraft im Hintergrund ({Math.round(settings.logoOpacity * 100)} %)</span>
-          <input
-            id={`${formId}-logo-opacity`}
-            type="range"
-            min={0}
-            max={40}
-            value={Math.round(settings.logoOpacity * 100)}
-            onChange={(event) => patch({ logoOpacity: Number(event.target.value) / 100 })}
-          />
-        </label>
+        {settings.backgroundPresetId === 'none' ? (
+          <label className="field" htmlFor={`${formId}-logo-opacity`}>
+            <span>Logo-Deckkraft im Hintergrund ({Math.round(settings.logoOpacity * 100)} %)</span>
+            <input
+              id={`${formId}-logo-opacity`}
+              type="range"
+              min={0}
+              max={40}
+              value={Math.round(settings.logoOpacity * 100)}
+              onChange={(event) => patch({ logoOpacity: Number(event.target.value) / 100 })}
+            />
+          </label>
+        ) : null}
 
         <label className="check-field">
           <input

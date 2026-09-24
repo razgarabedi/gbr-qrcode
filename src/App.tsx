@@ -20,7 +20,10 @@ import {
 } from './types/contact'
 import type { WallpaperSettings } from './types/wallpaper'
 
+type UiMode = 'start' | 'advanced'
+
 export default function App() {
+  const [uiMode, setUiMode] = useState<UiMode>('start')
   const [contact, setContact] = useState<ContactCard>(() => emptyContactCard())
   const [logo, setLogo] = useState<LogoAsset | null>(null)
   const [wallpaperBackground, setWallpaperBackground] = useState<LogoAsset | null>(null)
@@ -76,51 +79,98 @@ export default function App() {
             Generator
           </h1>
           <p className="hero__lead">
-            Erstellen Sie aus geschäftlichen Kontaktdaten einen QR-Code mit vCard und ein
-            professionelles Hintergrundbild für Smartphone oder Desktop. Alle Eingaben bleiben
-            ausschließlich in Ihrem Browser — es gibt kein Backend und keine Datenübertragung.
+            {uiMode === 'start'
+              ? 'Kontaktdaten eingeben, Logo wählen und QR-Code sowie Hintergrundbild als PNG herunterladen. Alle Eingaben bleiben ausschließlich in Ihrem Browser.'
+              : 'Erstellen Sie aus geschäftlichen Kontaktdaten einen QR-Code mit vCard und ein professionelles Hintergrundbild für Smartphone oder Desktop. Alle Eingaben bleiben ausschließlich in Ihrem Browser — es gibt kein Backend und keine Datenübertragung.'}
           </p>
         </div>
       </header>
 
       <main className="main" id="inhalt">
+        <div className="mode-switch">
+          <div className="segmented" role="radiogroup" aria-label="Ansicht wählen">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={uiMode === 'start'}
+              className={uiMode === 'start' ? 'segmented__btn is-active' : 'segmented__btn'}
+              onClick={() => setUiMode('start')}
+            >
+              Start
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={uiMode === 'advanced'}
+              className={uiMode === 'advanced' ? 'segmented__btn is-active' : 'segmented__btn'}
+              onClick={() => setUiMode('advanced')}
+            >
+              Erweitert
+            </button>
+          </div>
+          <p className="mode-switch__hint">
+            {uiMode === 'start'
+              ? 'Einfacher Weg: Kontakt, Logo, QR und Hintergrundbild.'
+              : 'Vollumfang: Import, Stapel, freies Logo und Export inkl. VCF.'}
+          </p>
+        </div>
+
         <Section
           id="kontaktdaten"
           title="Kontaktdaten"
-          description="Formular ausfüllen oder „Meine Visitenkarte importieren“ (.vcf) — auch auf dem iPhone."
+          description={
+            uiMode === 'start'
+              ? 'Formular ausfüllen — Vor- oder Nachname und eine Kontaktmöglichkeit reichen.'
+              : 'Formular ausfüllen oder „Meine Visitenkarte importieren“ (.vcf) — auch auf dem iPhone.'
+          }
         >
           <ContactForm
             contact={contact}
             onChange={setContact}
             sharedImportNotice={sharedImportNotice}
+            showImport={uiMode === 'advanced'}
           />
         </Section>
 
-        <Section
-          id="stapelimport"
-          title="Stapelimport & Batch-QR"
-          description="Eigene VCF/CSV laden oder andere Kontakte vom Handy wählen und QR-Codes als ZIP (Vorname_Nachname.png) exportieren."
-        >
-          <BatchImport
-            logo={logo}
-            qrStyle={qrStyle}
-            onLoadContact={setContact}
-          />
-        </Section>
+        {uiMode === 'advanced' ? (
+          <Section
+            id="stapelimport"
+            title="Stapelimport & Batch-QR"
+            description="Eigene VCF/CSV laden oder andere Kontakte vom Handy wählen und QR-Codes als ZIP (Vorname_Nachname.png) exportieren."
+          >
+            <BatchImport
+              logo={logo}
+              qrStyle={qrStyle}
+              onLoadContact={setContact}
+            />
+          </Section>
+        ) : null}
 
         <Section
           id="logo"
           title="Logo"
-          description="Optional: Firmenlogo für die Mitte des QR-Codes und dezent im Hintergrundbild."
+          description={
+            uiMode === 'start'
+              ? 'Stein oder GBHX wählen — für die Mitte des QR-Codes und dezent im Hintergrundbild.'
+              : 'Optional: Firmenlogo für die Mitte des QR-Codes und dezent im Hintergrundbild.'
+          }
         >
-          <LogoUpload logo={logo} onChange={setLogo} />
+          <LogoUpload
+            logo={logo}
+            onChange={setLogo}
+            mode={uiMode === 'start' ? 'presets' : 'full'}
+          />
         </Section>
 
         <div className="split">
           <Section
             id="qr-vorschau"
             title="QR-Code-Vorschau"
-            description="Lokal erzeugter QR-Code aus der vCard. Klassisch oder integriert (rot/navy)."
+            description={
+              uiMode === 'start'
+                ? 'Vorschau und Download als PNG. Stil: klassisch oder integriert (rot/navy).'
+                : 'Lokal erzeugter QR-Code aus der vCard. Klassisch oder integriert (rot/navy).'
+            }
           >
             <QrPreview
               contact={contact}
@@ -134,7 +184,11 @@ export default function App() {
           <Section
             id="hintergrundbild"
             title="Hintergrundbild-Vorschau"
-            description="Sperrbildschirm- und Desktop-Hintergründe. Optional eigenes Foto. Der QR folgt dem gewählten Stil (Klassisch oder Integriert)."
+            description={
+              uiMode === 'start'
+                ? 'Vorschau und Download als PNG. Optional Theme und Hintergrund anpassen.'
+                : 'Sperrbildschirm- und Desktop-Hintergründe. Optional eigenes Foto. Der QR folgt dem gewählten Stil (Klassisch oder Integriert).'
+            }
           >
             <WallpaperPreview
               contact={contact}
@@ -149,20 +203,22 @@ export default function App() {
           </Section>
         </div>
 
-        <Section
-          id="export"
-          title="Export"
-          description="PNG und VCF werden lokal heruntergeladen — ohne Server und ohne Cloud."
-        >
-          <ExportActions
-            canExport={canExport}
-            contact={contact}
-            logo={logo}
-            backgroundImage={wallpaperBackground}
-            qrStyle={qrStyle}
-            wallpaperSettings={wallpaperSettings}
-          />
-        </Section>
+        {uiMode === 'advanced' ? (
+          <Section
+            id="export"
+            title="Export"
+            description="PNG und VCF werden lokal heruntergeladen — ohne Server und ohne Cloud."
+          >
+            <ExportActions
+              canExport={canExport}
+              contact={contact}
+              logo={logo}
+              backgroundImage={wallpaperBackground}
+              qrStyle={qrStyle}
+              wallpaperSettings={wallpaperSettings}
+            />
+          </Section>
+        ) : null}
       </main>
 
       <footer className="footer">

@@ -349,8 +349,8 @@ export async function renderWallpaper(
     context.restore()
   }
 
-  // Firmenlogo dezent im Hintergrund
-  if (logo && settings.logoOpacity > 0) {
+  // Firmenlogo dezent im Hintergrund — nur bei reiner Farbe, nicht über Foto-Motiven
+  if (logo && !backgroundImage && settings.logoOpacity > 0) {
     const logoImage = await loadImage(getLogoImageSourceUrl(logo))
     const maxLogoW = width * (height >= width ? 0.72 : 0.42)
     const scale = Math.min(maxLogoW / logoImage.naturalWidth, (height * 0.28) / logoImage.naturalHeight)

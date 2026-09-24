@@ -8,12 +8,28 @@ import {
 } from '../lib/logo'
 import sampleLogoUrl from '../assets/logo-geb-becker.png'
 
+type LogoUploadMode = 'full' | 'presets'
+
 type LogoUploadProps = {
   logo: LogoAsset | null
   onChange: (logo: LogoAsset | null) => void
+  mode?: LogoUploadMode
 }
 
-export function LogoUpload({ logo, onChange }: LogoUploadProps) {
+const LOGO_PRESETS = [
+  { id: 'stein', label: 'Stein', url: '/stein.png', fileName: 'stein.png' },
+  { id: 'gbhx', label: 'GBHX', url: '/gbhx.png', fileName: 'gbhx.png' },
+] as const
+
+type LogoPresetId = (typeof LOGO_PRESETS)[number]['id']
+
+function activePresetId(logo: LogoAsset | null): LogoPresetId | null {
+  if (!logo) return null
+  const match = LOGO_PRESETS.find((preset) => preset.fileName === logo.fileName)
+  return match?.id ?? null
+}
+
+export function LogoUpload({ logo, onChange, mode = 'full' }: LogoUploadProps) {
   const inputId = useId()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState<string | null>(null)
@@ -67,7 +83,109 @@ export function LogoUpload({ logo, onChange }: LogoUploadProps) {
     }
   }
 
+  const handlePreset = async (presetId: LogoPresetId | null) => {
+    if (presetId === null) {
+      setError(null)
+      void replaceLogo(null)
+      return
+    }
+    const preset = LOGO_PRESETS.find((item) => item.id === presetId)
+    if (!preset) return
+    if (activePresetId(logo) === preset.id) return
+
+    setBusy(true)
+    setError(null)
+    try {
+      const loaded = await loadLogoFromUrl(
+        preset.url,
+        preset.fileName,
+        'image/png',
+        logo?.fitMode ?? 'contain',
+      )
+      await replaceLogo(loaded)
+    } catch {
+      setError(`Das Logo „${preset.label}“ konnte nicht geladen werden.`)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const accept = LOGO_ACCEPT_EXTENSIONS.join(',')
+  const selectedPreset = activePresetId(logo)
+
+  if (mode === 'presets') {
+    return (
+      <div className="logo-upload">
+        <div className="logo-dropzone" role="group" aria-label="Logo wählen">
+          <p className="logo-dropzone__title">
+            {selectedPreset === 'stein'
+              ? 'Ausgewählt: Stein'
+              : selectedPreset === 'gbhx'
+                ? 'Ausgewählt: GBHX'
+                : logo
+                  ? `Ausgewählt: ${logo.fileName}`
+                  : 'Noch kein Logo ausgewählt'}
+          </p>
+          <p className="logo-dropzone__hint">
+            Wählen Sie Stein oder GBHX für die Mitte des QR-Codes. Das Logo wird nur lokal
+            verarbeitet.
+          </p>
+
+          <div className="segmented" role="radiogroup" aria-label="Logo-Vorlage">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={selectedPreset === null && !logo}
+              className={
+                selectedPreset === null && !logo ? 'segmented__btn is-active' : 'segmented__btn'
+              }
+              disabled={busy}
+              onClick={() => {
+                void handlePreset(null)
+              }}
+            >
+              Kein Logo
+            </button>
+            {LOGO_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                role="radio"
+                aria-checked={selectedPreset === preset.id}
+                className={
+                  selectedPreset === preset.id ? 'segmented__btn is-active' : 'segmented__btn'
+                }
+                disabled={busy}
+                onClick={() => {
+                  void handlePreset(preset.id)
+                }}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+
+          {error ? (
+            <p className="field-error" role="alert">
+              {error}
+            </p>
+          ) : null}
+        </div>
+
+        {logo ? (
+          <div className="logo-preview-panel">
+            <div className="logo-preview">
+              <img
+                src={logo.objectUrl}
+                alt={`Vorschau: ${logo.fileName}`}
+                className="logo-preview__image"
+              />
+            </div>
+          </div>
+        ) : null}
+      </div>
+    )
+  }
 
   return (
     <div className="logo-upload">
