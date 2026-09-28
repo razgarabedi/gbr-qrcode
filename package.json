@@ -8,7 +8,11 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview --host",
     "typecheck": "tsc -b --pretty",
-    "test": "vitest run"
+    "test": "vitest run",
+    "handbook:screenshots": "node scripts/capture-handbook-screenshots.mjs",
+    "handbook:pdf": "node scripts/generate-handbook-pdf.mjs",
+    "handbook:odt": "python scripts/generate-handbook-odt.py",
+    "handbook": "npm run handbook:screenshots && npm run handbook:pdf && npm run handbook:odt"
   },
   "dependencies": {
     "jszip": "^3.10.2",
@@ -23,6 +27,7 @@
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.2",
     "jsqr": "^1.4.0",
+    "playwright": "^1.63.0",
     "pngjs": "^7.0.0",
     "typescript": "~5.9.2",
     "vite": "^7.1.5",
