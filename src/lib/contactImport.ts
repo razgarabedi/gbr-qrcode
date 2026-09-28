@@ -104,10 +104,21 @@ function assignPhone(contact: ContactCard, params: string, value: string): void 
   else if (!contact.phoneMobile) contact.phoneMobile = v
 }
 
-function assignEmail(contact: ContactCard, value: string): void {
+function assignEmail(contact: ContactCard, params: string, value: string): void {
   const v = trimValue(value)
   if (!v) return
+  const isHome = params.includes('HOME') || params.includes('PRIV')
+  const isWork = params.includes('WORK')
+  if (isHome && !isWork) {
+    if (!contact.emailPrivate) contact.emailPrivate = v
+    return
+  }
+  if (isWork) {
+    if (!contact.emailWork) contact.emailWork = v
+    return
+  }
   if (!contact.emailWork) contact.emailWork = v
+  else if (!contact.emailPrivate) contact.emailPrivate = v
 }
 
 /**
@@ -161,7 +172,7 @@ export function parseSingleVCard(block: string): ContactCard {
         assignPhone(contact, params, value)
         break
       case 'EMAIL':
-        assignEmail(contact, value)
+        assignEmail(contact, params, value)
         break
       case 'URL':
         contact.website = trimValue(value)
@@ -280,6 +291,7 @@ type CsvField =
   | 'phoneMobile'
   | 'phoneWork'
   | 'emailWork'
+  | 'emailPrivate'
   | 'website'
   | 'street'
   | 'postalCode'
@@ -311,7 +323,12 @@ const CSV_HEADER_MAP: Array<{ match: RegExp; field: CsvField }> = [
   },
   {
     match:
-      /^(e-?mail address|e-?mail|e-mail-adresse|email address|e-mail 1 - value|primary email)$/,
+      /^(e-?mail 2 - value|e-?mail 2 address|home e-?mail|private e-?mail|private e-mail-adresse|persönliche e-mail|persönliche e-mail-adresse|e-?mail privat)$/,
+    field: 'emailPrivate',
+  },
+  {
+    match:
+      /^(e-?mail address|e-?mail|e-mail-adresse|email address|e-mail 1 - value|primary email|e-mail geschäftlich|geschäftliche e-mail)$/,
     field: 'emailWork',
   },
   {

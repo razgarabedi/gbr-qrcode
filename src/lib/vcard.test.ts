@@ -133,6 +133,21 @@ describe('buildVCard', () => {
     expect(text).toContain('URL:https://www.firma.de')
   })
 
+  it('schreibt geschäftliche und private E-Mail getrennt in die vCard', () => {
+    const text = buildVCard(
+      baseContact({
+        emailWork: 'max@firma.de',
+        emailPrivate: 'max@email.de',
+      }),
+    )
+    expect(text).toContain('EMAIL;TYPE=INTERNET,WORK:max@firma.de')
+    expect(text).toContain('EMAIL;TYPE=INTERNET,HOME:max@email.de')
+    const workAt = text.indexOf('EMAIL;TYPE=INTERNET,WORK:')
+    const homeAt = text.indexOf('EMAIL;TYPE=INTERNET,HOME:')
+    expect(workAt).toBeGreaterThan(-1)
+    expect(homeAt).toBeGreaterThan(workAt)
+  })
+
   it('escaped Sonderzeichen in Werten, aber nicht ADR-Trenner', () => {
     const text = buildVCard(
       baseContact({

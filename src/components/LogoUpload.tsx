@@ -18,7 +18,7 @@ type LogoUploadProps = {
 
 const LOGO_PRESETS = [
   { id: 'stein', label: 'Stein', url: '/stein.png', fileName: 'stein.png' },
-  { id: 'gbhx', label: 'GBHX', url: '/gbhx.png', fileName: 'gbhx.png' },
+  { id: 'gbhx', label: 'Gebr.Becker', url: '/gbhx.png', fileName: 'gbhx.png' },
 ] as const
 
 type LogoPresetId = (typeof LOGO_PRESETS)[number]['id']
@@ -121,13 +121,13 @@ export function LogoUpload({ logo, onChange, mode = 'full' }: LogoUploadProps) {
             {selectedPreset === 'stein'
               ? 'Ausgewählt: Stein'
               : selectedPreset === 'gbhx'
-                ? 'Ausgewählt: GBHX'
+                ? 'Ausgewählt: Gebr.Becker'
                 : logo
                   ? `Ausgewählt: ${logo.fileName}`
                   : 'Noch kein Logo ausgewählt'}
           </p>
           <p className="logo-dropzone__hint">
-            Wählen Sie Stein oder GBHX für die Mitte des QR-Codes. Das Logo wird nur lokal
+            Wählen Sie Stein oder Gebr.Becker für die Mitte des QR-Codes. Das Logo wird nur lokal
             verarbeitet.
           </p>
 

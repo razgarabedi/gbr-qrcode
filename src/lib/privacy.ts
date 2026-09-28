@@ -11,6 +11,7 @@ export type QrIncludeField =
   | 'phoneMobile'
   | 'phoneWork'
   | 'emailWork'
+  | 'emailPrivate'
   | 'website'
   | 'street'
   | 'postalCode'
@@ -44,6 +45,7 @@ export const QR_FIELD_OPTIONS: FieldOption[] = [
   { key: 'phoneMobile', label: 'Geschäftliche Mobilnummer', inMinimal: true, required: false },
   { key: 'phoneWork', label: 'Geschäftliche Festnetznummer', inMinimal: true, required: false },
   { key: 'emailWork', label: 'Geschäftliche E-Mail-Adresse', inMinimal: true, required: false },
+  { key: 'emailPrivate', label: 'Private E-Mail-Adresse', inMinimal: true, required: false },
   { key: 'website', label: 'Firmenwebseite', inMinimal: true, required: false },
   { key: 'street', label: 'Straße und Hausnummer', inMinimal: false, required: false },
   { key: 'postalCode', label: 'Postleitzahl', inMinimal: false, required: false },
@@ -54,7 +56,6 @@ export const QR_FIELD_OPTIONS: FieldOption[] = [
 /** Kategorien, die die Anwendung bewusst niemals in den QR-Code schreibt. */
 export const NEVER_INCLUDED_ITEMS = [
   'Private Telefonnummern',
-  'Private E-Mail-Adressen',
   'Geburtstage',
   'Interne Durchwahlen (nur nach ausdrücklicher Auswahl – hier nicht vorgesehen)',
   'Personalnummern',
@@ -84,6 +85,7 @@ export function createBusinessIncludeMap(): FieldIncludeMap {
     phoneMobile: true,
     phoneWork: true,
     emailWork: true,
+    emailPrivate: true,
     website: true,
     street: false,
     postalCode: false,
@@ -102,6 +104,7 @@ export function createMinimalIncludeMap(): FieldIncludeMap {
     phoneMobile: true,
     phoneWork: true,
     emailWork: true,
+    emailPrivate: true,
     website: true,
     street: false,
     postalCode: false,

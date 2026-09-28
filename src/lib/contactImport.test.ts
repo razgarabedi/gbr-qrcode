@@ -57,6 +57,17 @@ END:VCARD`)
     expect(contact.postalCode).toBe('10115')
     expect(contact.country).toBe('Deutschland')
   })
+
+  it('trennt geschäftliche und private E-Mail', () => {
+    const contact = parseSingleVCard(`BEGIN:VCARD
+VERSION:3.0
+N:Mustermann;Max;;;
+EMAIL;TYPE=INTERNET,WORK:max@firma.de
+EMAIL;TYPE=HOME:max@email.de
+END:VCARD`)
+    expect(contact.emailWork).toBe('max@firma.de')
+    expect(contact.emailPrivate).toBe('max@email.de')
+  })
 })
 
 describe('parseCsvContacts', () => {

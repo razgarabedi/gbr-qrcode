@@ -7,6 +7,7 @@ export type ContactCard = {
   phoneMobile: string
   phoneWork: string
   emailWork: string
+  emailPrivate: string
   website: string
   street: string
   postalCode: string
@@ -45,6 +46,7 @@ export const emptyContactCard = (): ContactCard => ({
   phoneMobile: '',
   phoneWork: '',
   emailWork: '',
+  emailPrivate: '',
   website: '',
   street: '',
   postalCode: '',

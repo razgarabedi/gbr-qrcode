@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { ContactCard, LogoAsset } from '../types/contact'
-import { downloadDataUrl } from '../lib/download'
+import { IosSaveFollowUp, IosSaveHint } from './IosSaveFollowUp'
+import { useSaveFile } from '../lib/useSaveFile'
 import {
   assessQrDensity,
   buildQrPngFileName,
@@ -45,6 +46,7 @@ export function QrPreview({
   const [testImageUrl, setTestImageUrl] = useState<string | null>(null)
   const [testResult, setTestResult] = useState<TestResult | null>(null)
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const save = useSaveFile()
 
   const vcardText = useMemo(
     () => (canGenerate ? buildVCard(contact) : ''),
@@ -103,8 +105,13 @@ export function QrPreview({
       size: exportSize,
       logo: usesCenterLogo ? logo : null,
     })
-    downloadDataUrl(result.dataUrl, buildQrPngFileName(contact, exportSize))
-    setComposeWarning(result.warning)
+    const saved = await save.saveFromDataUrl(
+      result.dataUrl,
+      buildQrPngFileName(contact, exportSize),
+    )
+    if (saved.status === 'downloaded' || saved.status === 'shared') {
+      setComposeWarning(result.warning)
+    }
   }
 
   const handleTest = async () => {
@@ -226,6 +233,12 @@ export function QrPreview({
             QR-Code testen
           </button>
         </div>
+        <IosSaveHint />
+        <IosSaveFollowUp
+          pending={save.pending}
+          notice={save.notice}
+          onConfirm={save.confirmPending}
+        />
       </div>
 
       <dialog

@@ -1,7 +1,8 @@
 import { useId, useMemo, useState } from 'react'
 import type { ContactCard, LogoAsset } from '../types/contact'
 import type { WallpaperSettings } from '../types/wallpaper'
-import { downloadDataUrl, downloadVcfFile } from '../lib/download'
+import { IosSaveFollowUp, IosSaveHint } from './IosSaveFollowUp'
+import { useSaveFile } from '../lib/useSaveFile'
 import {
   assessQrDensity,
   buildQrPngFileName,
@@ -35,6 +36,7 @@ export function ExportActions({
   const [logoWarning, setLogoWarning] = useState<string | null>(null)
   const [wallpaperStatus, setWallpaperStatus] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const save = useSaveFile()
 
   const vcardText = useMemo(() => (canExport ? buildVCard(contact) : ''), [canExport, contact])
   const fileName = useMemo(
@@ -43,9 +45,9 @@ export function ExportActions({
   )
   const density = useMemo(() => assessQrDensity(vcardText), [vcardText])
 
-  const handleVcfDownload = () => {
+  const handleVcfDownload = async () => {
     if (!canExport || !vcardText) return
-    downloadVcfFile(vcardText, fileName)
+    await save.saveFromText(vcardText, fileName, 'text/vcard', { utf8Bom: true })
   }
 
   const handleQrDownload = async () => {
@@ -57,8 +59,10 @@ export function ExportActions({
         size: qrSize,
         logo: qrStyle === 'classic' ? logo : null,
       })
-      downloadDataUrl(result.dataUrl, buildQrPngFileName(contact, qrSize))
-      setLogoWarning(result.warning)
+      const saved = await save.saveFromDataUrl(result.dataUrl, buildQrPngFileName(contact, qrSize))
+      if (saved.status === 'downloaded' || saved.status === 'shared') {
+        setLogoWarning(result.warning)
+      }
     } catch {
       setExportError('Der QR-Code-Export ist fehlgeschlagen.')
     }
@@ -77,13 +81,18 @@ export function ExportActions({
         backgroundImage,
         qrStyle,
       )
-      downloadDataUrl(result.dataUrl, buildWallpaperFileName(contact, wallpaperSettings))
-      setLogoWarning(result.warning)
-      setWallpaperStatus(
-        result.readable
-          ? 'Wallpaper exportiert. QR-Code im Bild wurde erfolgreich decodiert.'
-          : 'Wallpaper exportiert, aber die QR-Prüfung im Bild ist fehlgeschlagen.',
+      const saved = await save.saveFromDataUrl(
+        result.dataUrl,
+        buildWallpaperFileName(contact, wallpaperSettings),
       )
+      if (saved.status === 'downloaded' || saved.status === 'shared') {
+        setLogoWarning(result.warning)
+        setWallpaperStatus(
+          result.readable
+            ? 'Wallpaper exportiert. QR-Code im Bild wurde erfolgreich decodiert.'
+            : 'Wallpaper exportiert, aber die QR-Prüfung im Bild ist fehlgeschlagen.',
+        )
+      }
     } catch {
       setExportError('Der Wallpaper-Export ist fehlgeschlagen.')
     } finally {
@@ -139,11 +148,15 @@ export function ExportActions({
           type="button"
           className="button button--secondary"
           disabled={!canExport}
-          onClick={handleVcfDownload}
+          onClick={() => {
+            void handleVcfDownload()
+          }}
         >
           Kontaktkarte als VCF
         </button>
       </div>
+      <IosSaveHint />
+      <IosSaveFollowUp pending={save.pending} notice={save.notice} onConfirm={save.confirmPending} />
 
       {!canExport ? (
         <p className="placeholder-note">

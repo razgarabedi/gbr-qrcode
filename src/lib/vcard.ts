@@ -66,9 +66,14 @@ export function buildVCard(contact: ContactCard): string {
     lines.push(line('TEL;TYPE=WORK,VOICE', phoneWork))
   }
 
-  const email = filled(contact.emailWork)
-  if (email) {
-    lines.push(line('EMAIL;TYPE=INTERNET,WORK', email))
+  const emailWork = filled(contact.emailWork)
+  if (emailWork) {
+    lines.push(line('EMAIL;TYPE=INTERNET,WORK', emailWork))
+  }
+
+  const emailPrivate = filled(contact.emailPrivate)
+  if (emailPrivate) {
+    lines.push(line('EMAIL;TYPE=INTERNET,HOME', emailPrivate))
   }
 
   const websiteRaw = filled(contact.website)

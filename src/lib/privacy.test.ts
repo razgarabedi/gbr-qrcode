@@ -19,6 +19,7 @@ const fullContact = {
   phoneMobile: '+49 170 111',
   phoneWork: '+49 89 222',
   emailWork: 'max@firma.de',
+  emailPrivate: 'max@email.de',
   website: 'www.firma.de',
   street: 'Geheimweg 1',
   postalCode: '80331',
@@ -33,12 +34,14 @@ describe('filterContactForQr', () => {
     expect(filtered.street).toBe('')
     expect(filtered.city).toBe('')
     expect(filtered.emailWork).toBe('max@firma.de')
+    expect(filtered.emailPrivate).toBe('max@email.de')
     expect(filtered.phoneWork).toBe('+49 89 222')
 
     const vcard = buildVCard(filtered)
     expect(vcard).not.toContain('ADR;')
     expect(vcard).not.toContain('Intern')
     expect(vcard).toContain('EMAIL;TYPE=INTERNET,WORK:max@firma.de')
+    expect(vcard).toContain('EMAIL;TYPE=INTERNET,HOME:max@email.de')
   })
 
   it('beschränkt den datensparsamen Modus auf die erlaubten Felder', () => {
@@ -84,8 +87,10 @@ describe('filterContactForQr', () => {
       phoneMobile: false,
       phoneWork: false,
       emailWork: false,
+      emailPrivate: false,
     })
     expect(noContact.emailWork).toBe('')
+    expect(noContact.emailPrivate).toBe('')
     expect(
       isPrivacyExportReady(fullContact, {
         mode: 'business',
@@ -94,6 +99,7 @@ describe('filterContactForQr', () => {
           phoneMobile: false,
           phoneWork: false,
           emailWork: false,
+          emailPrivate: false,
         },
       }),
     ).toBe(false)

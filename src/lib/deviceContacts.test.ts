@@ -14,6 +14,15 @@ describe('mapDeviceContactToCard', () => {
     expect(contact.emailWork).toBe('max@firma.de')
   })
 
+  it('legt die zweite E-Mail als Privatadresse ab', () => {
+    const contact = mapDeviceContactToCard({
+      name: ['Max Mustermann'],
+      email: ['max@firma.de', 'max@email.de'],
+    })
+    expect(contact.emailWork).toBe('max@firma.de')
+    expect(contact.emailPrivate).toBe('max@email.de')
+  })
+
   it('setzt zweite Nummer als Festnetz und Adresse/Firma', () => {
     const contact = mapDeviceContactToCard({
       name: ['Anna'],

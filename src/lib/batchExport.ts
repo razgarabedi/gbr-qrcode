@@ -1,6 +1,5 @@
 import JSZip from 'jszip'
 import type { ContactCard, LogoAsset } from '../types/contact'
-import { downloadBlob } from './download'
 import { isBatchContactExportable } from './contactImport'
 import { buildQrPngFileName, type QrExportSize } from './qr'
 import { type QrVisualStyle, renderQrVisual } from './qrShape'
@@ -90,10 +89,6 @@ export async function buildBatchQrZip(
 
   const blob = await zip.generateAsync({ type: 'blob' })
   return { blob, exported, skipped }
-}
-
-export function downloadBatchQrZip(blob: Blob, fileName = 'qr-codes.zip'): void {
-  downloadBlob(blob, fileName)
 }
 
 /** Optionaler Hilfsname inkl. Größe (Einzelexport-Kompatibilität). */

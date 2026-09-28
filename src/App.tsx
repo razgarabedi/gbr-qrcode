@@ -151,7 +151,7 @@ export default function App() {
           title="Logo"
           description={
             uiMode === 'start'
-              ? 'Stein oder GBHX wählen — für die Mitte des QR-Codes und dezent im Hintergrundbild.'
+              ? 'Stein oder Gebr.Becker wählen — für die Mitte des QR-Codes und dezent im Hintergrundbild.'
               : 'Optional: Firmenlogo für die Mitte des QR-Codes und dezent im Hintergrundbild.'
           }
         >

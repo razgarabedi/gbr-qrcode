@@ -24,6 +24,7 @@ const FIELD_ORDER: ContactField[] = [
   'phoneMobile',
   'phoneWork',
   'emailWork',
+  'emailPrivate',
   'website',
   'street',
   'postalCode',
@@ -124,8 +125,8 @@ export function ContactForm({
     <div className="contact-form-block">
       <form className="contact-form" noValidate onSubmit={handleSubmit}>
         <p className="form-intro">
-          Mindestens Vor- oder Nachname sowie eine Kontaktmöglichkeit (E-Mail, geschäftliche
-          Mobilnummer oder Festnetz) sind erforderlich. Die Firma ist optional. Die Daten bleiben
+          Mindestens Vor- oder Nachname sowie eine Kontaktmöglichkeit (geschäftliche oder private
+          E-Mail, Mobilnummer oder Festnetz) sind erforderlich. Die Firma ist optional. Die Daten bleiben
           nur in diesem Browserfenster — es findet keine Speicherung und keine Übertragung statt.
         </p>
 
@@ -271,7 +272,22 @@ export function ContactForm({
               markTouched('contactMethod')
             }}
             placeholder="max.mustermann@firma.de"
-            className="field--wide"
+            describedBy={contactMethodError ? contactMethodErrorId : undefined}
+          />
+          <Field
+            id={`${formId}-emailPrivate`}
+            label="Private E-Mail-Adresse"
+            type="email"
+            autoComplete="email"
+            inputMode="email"
+            value={contact.emailPrivate}
+            error={visibleError('emailPrivate')}
+            onChange={(value) => update('emailPrivate', value)}
+            onBlur={() => {
+              markTouched('emailPrivate')
+              markTouched('contactMethod')
+            }}
+            placeholder="max.mustermann@email.de"
             describedBy={contactMethodError ? contactMethodErrorId : undefined}
           />
           {contactMethodError ? (

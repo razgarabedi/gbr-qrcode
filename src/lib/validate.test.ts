@@ -70,6 +70,16 @@ describe('validateContact', () => {
     expect(isContactValid(contact)).toBe(true)
   })
 
+  it('ist gültig mit nur privater E-Mail', () => {
+    const contact = {
+      ...emptyContactCard(),
+      firstName: 'Max',
+      emailPrivate: 'max@email.de',
+    }
+    expect(validateContact(contact)).toEqual({})
+    expect(isContactValid(contact)).toBe(true)
+  })
+
   it('ist gültig bei vollständigen Mindestanforderungen', () => {
     const contact = {
       ...emptyContactCard(),

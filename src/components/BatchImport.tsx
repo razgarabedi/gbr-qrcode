@@ -1,10 +1,8 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { ContactCard, LogoAsset } from '../types/contact'
-import {
-  buildBatchQrZip,
-  buildBatchZipArchiveName,
-  downloadBatchQrZip,
-} from '../lib/batchExport'
+import { buildBatchQrZip, buildBatchZipArchiveName } from '../lib/batchExport'
+import { IosSaveFollowUp, IosSaveHint } from './IosSaveFollowUp'
+import { useSaveFile } from '../lib/useSaveFile'
 import {
   importContactsFromFiles,
   isBatchContactExportable,
@@ -38,6 +36,7 @@ export function BatchImport({ logo, qrStyle, onLoadContact }: BatchImportProps) 
   const [busy, setBusy] = useState(false)
   const [exportBusy, setExportBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const save = useSaveFile()
   const [status, setStatus] = useState<string | null>(null)
   const [progress, setProgress] = useState<string | null>(null)
   const [exportSize, setExportSize] = useState<QrExportSize>(1024)
@@ -156,11 +155,17 @@ export function BatchImport({ logo, qrStyle, onLoadContact }: BatchImportProps) 
           setProgress(`Erzeuge QR ${current} / ${total}: ${label}`)
         },
       })
-      downloadBatchQrZip(blob, buildBatchZipArchiveName(exportSize))
-      setStatus(
-        `ZIP mit ${exported} QR-Code${exported === 1 ? '' : 's'} heruntergeladen` +
-          (skipped > 0 ? ` · ${skipped} übersprungen (unvollständig).` : '.'),
+      const saved = await save.saveFromBlob(
+        blob,
+        buildBatchZipArchiveName(exportSize),
+        blob.type || 'application/zip',
       )
+      if (saved.status === 'downloaded' || saved.status === 'shared') {
+        setStatus(
+          `ZIP mit ${exported} QR-Code${exported === 1 ? '' : 's'} heruntergeladen` +
+            (skipped > 0 ? ` · ${skipped} übersprungen (unvollständig).` : '.'),
+        )
+      }
       setProgress(null)
     } catch {
       setError('Der ZIP-Export ist fehlgeschlagen.')
@@ -297,6 +302,12 @@ export function BatchImport({ logo, qrStyle, onLoadContact }: BatchImportProps) 
                 : `QR-Codes als ZIP (${summary.exportable})`}
             </button>
           </div>
+          <IosSaveHint />
+          <IosSaveFollowUp
+            pending={save.pending}
+            notice={save.notice}
+            onConfirm={save.confirmPending}
+          />
 
           {importResult.issues.length > 0 ? (
             <details className="batch-import__issues">
@@ -329,7 +340,11 @@ export function BatchImport({ logo, qrStyle, onLoadContact }: BatchImportProps) 
                 {importResult.contacts.map((contact, index) => {
                   const exportable = isBatchContactExportable(contact)
                   const contactLine =
-                    contact.emailWork || contact.phoneMobile || contact.phoneWork || '—'
+                    contact.emailWork ||
+                    contact.emailPrivate ||
+                    contact.phoneMobile ||
+                    contact.phoneWork ||
+                    '—'
                   return (
                     <tr key={`${contact.firstName}-${contact.lastName}-${index}`}>
                       <td>

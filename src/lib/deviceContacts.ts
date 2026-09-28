@@ -58,8 +58,10 @@ function assignPhones(contact: ContactCard, phones: string[]): void {
 }
 
 function assignEmails(contact: ContactCard, emails: string[]): void {
-  const first = emails.map(trimValue).find(Boolean)
-  if (first) contact.emailWork = first
+  const unique = [...new Set(emails.map(trimValue).filter(Boolean))]
+  if (unique.length === 0) return
+  contact.emailWork = unique[0]
+  if (unique.length > 1) contact.emailPrivate = unique[1]
 }
 
 function assignAddress(contact: ContactCard, address: DeviceContactAddress): void {
@@ -137,7 +139,8 @@ export async function pickDeviceContacts(options?: {
           trimValue(contact.lastName) ||
           trimValue(contact.phoneMobile) ||
           trimValue(contact.phoneWork) ||
-          trimValue(contact.emailWork),
+          trimValue(contact.emailWork) ||
+          trimValue(contact.emailPrivate),
       )
 
     if (contacts.length === 0) {

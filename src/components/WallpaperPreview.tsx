@@ -11,7 +11,8 @@ import {
   type WallpaperSettings,
   type WallpaperTheme,
 } from '../types/wallpaper'
-import { downloadDataUrl } from '../lib/download'
+import { IosSaveFollowUp, IosSaveHint } from './IosSaveFollowUp'
+import { useSaveFile } from '../lib/useSaveFile'
 import {
   LOGO_ACCEPT_EXTENSIONS,
   loadLogoFromFile,
@@ -66,6 +67,7 @@ export function WallpaperPreview({
   const [exportStatus, setExportStatus] = useState<string | null>(null)
   const [bgBusy, setBgBusy] = useState(false)
   const [bgError, setBgError] = useState<string | null>(null)
+  const save = useSaveFile()
 
   const vcardText = useMemo(
     () => (canGenerate ? buildVCard(contact) : ''),
@@ -194,13 +196,18 @@ export function WallpaperPreview({
         backgroundImage,
         qrStyle,
       )
-      downloadDataUrl(result.dataUrl, buildWallpaperFileName(contact, settings))
-      setWarning(result.warning)
-      setExportStatus(
-        result.readable
-          ? 'Export abgeschlossen. QR-Code im Wallpaper wurde erfolgreich geprüft.'
-          : 'Export abgeschlossen, aber die QR-Prüfung ist fehlgeschlagen.',
+      const saved = await save.saveFromDataUrl(
+        result.dataUrl,
+        buildWallpaperFileName(contact, settings),
       )
+      if (saved.status === 'downloaded' || saved.status === 'shared') {
+        setWarning(result.warning)
+        setExportStatus(
+          result.readable
+            ? 'Export abgeschlossen. QR-Code im Wallpaper wurde erfolgreich geprüft.'
+            : 'Export abgeschlossen, aber die QR-Prüfung ist fehlgeschlagen.',
+        )
+      }
     } catch {
       setExportStatus('Der Wallpaper-Export ist fehlgeschlagen.')
     } finally {
@@ -512,6 +519,12 @@ export function WallpaperPreview({
             {exporting ? 'Exportiere…' : 'Hintergrundbild als PNG'}
           </button>
         </div>
+        <IosSaveHint />
+        <IosSaveFollowUp
+          pending={save.pending}
+          notice={save.notice}
+          onConfirm={save.confirmPending}
+        />
         {exportStatus ? (
           <p className="placeholder-note" role="status">
             {exportStatus}

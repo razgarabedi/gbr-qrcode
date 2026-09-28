@@ -455,6 +455,17 @@ input {
   gap: 0.65rem;
 }
 
+.ios-save-hint {
+  margin-top: 0.75rem;
+}
+
+.ios-save-followup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
 .button {
   border: 1px solid var(--color-brand-navy);
   border-radius: 8px;

@@ -18,6 +18,7 @@ export function ContactCardPreview({ contact, errors }: ContactCardPreviewProps)
       contact.organization ||
       contact.department ||
       contact.emailWork ||
+      contact.emailPrivate ||
       contact.phoneMobile ||
       contact.phoneWork ||
       contact.website ||
@@ -74,8 +75,14 @@ export function ContactCardPreview({ contact, errors }: ContactCardPreviewProps)
               ) : null}
               {contact.emailWork ? (
                 <li>
-                  <span className="business-card__label">E-Mail</span>
+                  <span className="business-card__label">E-Mail geschäftlich</span>
                   <span>{contact.emailWork}</span>
+                </li>
+              ) : null}
+              {contact.emailPrivate ? (
+                <li>
+                  <span className="business-card__label">E-Mail privat</span>
+                  <span>{contact.emailPrivate}</span>
                 </li>
               ) : null}
               {websiteHref ? (

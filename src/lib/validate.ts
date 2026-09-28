@@ -16,6 +16,7 @@ export function trimValue(value: string): string {
 export function hasContactMethod(contact: ContactCard): boolean {
   return Boolean(
     trimValue(contact.emailWork) ||
+      trimValue(contact.emailPrivate) ||
       trimValue(contact.phoneMobile) ||
       trimValue(contact.phoneWork),
   )
@@ -70,7 +71,11 @@ export function validateContact(contact: ContactCard): ContactErrors {
   }
 
   if (!isValidEmail(contact.emailWork)) {
-    errors.emailWork = 'Bitte geben Sie eine gültige E-Mail-Adresse ein.'
+    errors.emailWork = 'Bitte geben Sie eine gültige geschäftliche E-Mail-Adresse ein.'
+  }
+
+  if (!isValidEmail(contact.emailPrivate)) {
+    errors.emailPrivate = 'Bitte geben Sie eine gültige private E-Mail-Adresse ein.'
   }
 
   if (!isValidPhone(contact.phoneMobile)) {
